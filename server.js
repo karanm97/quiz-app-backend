@@ -4,8 +4,11 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const User = require("./models/user.model");
 const Topic = require("./models/topic.model");
+const Leaderboard = require("./models/leaderboard.model");
+
 const jwt = require("jsonwebtoken");
 const getRandomQuestionsByTopicNames = require("./queries/fetchQuestions");
+const getLeaderboardData = require("./queries/fetchLeaderboardData");
 require("dotenv").config();
 
 app.use(cors());
@@ -79,6 +82,35 @@ app.post("/api/topics/select", async (req, res) => {
 	const { selectedTags } = data;
 	const response = await getRandomQuestionsByTopicNames(selectedTags);
 	res.json(response);
+});
+
+// leaderboard get
+app.get("/api/leaderboard", async (req, res) => {
+	const leaderboardData = await getLeaderboardData();
+	if (leaderboardData.length > 0) {
+		res.json(leaderboardData);
+	} else {
+		res.json({ error: "Unable to fetch topics." });
+	}
+});
+
+// leaderboard post
+app.post("/api/leaderboard", async (req, res) => {
+	try {
+		// console.log(req.body);
+		const { email, score } = req.body;
+		const user = await User.findOne({ email });
+		const leaderboardData = await Leaderboard.create({
+			email: user._id,
+			score,
+		});
+		res.json({ status: "ok" });
+	} catch (error) {
+		console.log(error);
+		res.json({
+			status: "Something went wrong.",
+		});
+	}
 });
 
 app.listen(3000, () => {
