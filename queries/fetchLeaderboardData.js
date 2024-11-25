@@ -7,15 +7,15 @@ const getLeaderboardData = async () => {
 		const leaderboard = await leaderboardModel
 			.find()
 			.populate({
-				path: "email", // field to populate
-				model: "UserData", // model to use
-				select: "email -_id", // only select email field, exclude _id
+				path: "email", // This should be the reference field; check your schema
+				model: "UserData", // Ensure this is correct model name
+				select: "email -_id", // Only select the email field, exclude _id
 			})
 			.sort({ score: -1 }); // sort by score descending
 
 		// Format the response to get email string from populated User document
 		const formattedLeaderboard = leaderboard.map((entry) => ({
-			email: entry.email.email, // get email string from populated User document
+			email: entry.email ? entry.email.email : "No Email", // Handle missing email
 			score: entry.score,
 		}));
 
