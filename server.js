@@ -24,6 +24,7 @@ app.get("/hello", (req, res) => {
 // Middleware for protecting routes
 const authenticateToken = (req, res, next) => {
 	const authHeader = req.headers["authorization"];
+
 	const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
 	if (token == null) {
@@ -100,7 +101,7 @@ app.post("/api/users/login", async (req, res) => {
 	}
 });
 
-// quiz topics get
+// quiz topics protected route
 app.get("/api/topics/select", authenticateToken, async (req, res) => {
 	const topics = await Topic.find();
 	if (topics.length > 0) {
@@ -110,7 +111,7 @@ app.get("/api/topics/select", authenticateToken, async (req, res) => {
 	}
 });
 
-// quiz topics post
+// quiz topics post protected route
 app.post("/api/topics/select", authenticateToken, async (req, res) => {
 	const data = req.body;
 	const { selectedTags } = data;
@@ -128,10 +129,9 @@ app.get("/api/leaderboard", async (req, res) => {
 	}
 });
 
-// leaderboard post
-app.post("/api/leaderboard", async (req, res) => {
+// leaderboard post protected route
+app.post("/api/leaderboard", authenticateToken, async (req, res) => {
 	try {
-		// console.log(req.body);
 		const { email, score } = req.body;
 		const user = await User.findOne({ email });
 		const leaderboardData = await Leaderboard.create({
