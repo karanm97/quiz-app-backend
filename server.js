@@ -36,6 +36,7 @@ const authenticateToken = (req, res, next) => {
 			return res.sendStatus(403); // Invalid token
 		}
 		req.user = user;
+		req.token = token;
 		next();
 	});
 };
@@ -101,6 +102,18 @@ app.post("/api/users/login", async (req, res) => {
 	}
 });
 
+// verify token
+app.get("/api/verify-token", authenticateToken, (req, res) => {
+	res.json({
+		valid: true,
+		user: {
+			userId: req.user.userId,
+			email: req.user.email,
+			token: req.token,
+		},
+	});
+});
+
 // quiz topics protected route
 app.get("/api/topics/select", authenticateToken, async (req, res) => {
 	const topics = await Topic.find();
@@ -122,8 +135,24 @@ app.post("/api/topics/select", authenticateToken, async (req, res) => {
 // leaderboard get
 app.get("/api/leaderboard", async (req, res) => {
 	const leaderboardData = await getLeaderboardData();
+
 	if (leaderboardData.length > 0) {
 		res.json(leaderboardData);
+	} else {
+		res.json({ error: "Unable to fetch topics." });
+	}
+});
+
+// leaderboard get
+app.get("/api/leaderboard-token", authenticateToken, async (req, res) => {
+	const leaderboardData = await getLeaderboardData();
+
+	if (leaderboardData.length > 0) {
+		res.json({
+			email: req.user.email,
+			token: req.token,
+			data: leaderboardData,
+		});
 	} else {
 		res.json({ error: "Unable to fetch topics." });
 	}
