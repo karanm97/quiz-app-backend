@@ -17,6 +17,8 @@ app.use(express.json());
 
 mongoose.connect(process.env.MONGODB_URI);
 
+const apiUrl = process.env.NODE_API_URL;
+
 app.get("/hello", (req, res) => {
 	res.json({ response: "hello world" });
 });
@@ -177,5 +179,5 @@ app.post("/api/leaderboard", authenticateToken, async (req, res) => {
 });
 
 app.listen(3000, () => {
-	console.log("Server started at http://localhost:3000");
+	console.log(`Server started at ${apiUrl} `);
 });
